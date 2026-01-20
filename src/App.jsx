@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, addDoc, updateDoc, deleteDoc, onSnapshot, collection, query, orderBy, serverTimestamp } from 'firebase/firestore';
@@ -128,6 +128,23 @@ const RecipeForm = ({ onSubmit, initialData = null, isSaving }) => {
   );
 };
 
+// --- Custom Component: Ingredient Item ---
+const Ingredient = React.memo(({ item, index, isChecked, onToggle }) => {
+  return (
+    <li
+      className={`flex items-start group cursor-pointer transition-all duration-200 ${isChecked ? 'opacity-50' : 'opacity-100'}`}
+      onClick={() => onToggle(index)}
+    >
+      <div className={`mt-0.5 mr-3 w-5 h-5 flex-shrink-0 border-2 rounded flex items-center justify-center transition-colors ${isChecked ? 'bg-amber-600 border-amber-600' : 'border-amber-300 group-hover:border-amber-500'}`}>
+        {isChecked && <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
+      </div>
+      <span className={`text-base leading-snug font-serif text-gray-800 transition-all ${isChecked ? 'line-through decoration-amber-600/50' : ''}`}>
+        {item}
+      </span>
+    </li>
+  );
+});
+
 // --- Custom Component: Recipe Page Display ---
 const RecipePage = ({ recipe, onEdit, onDelete }) => {
   // State to track which ingredients are checked off (for cooking progress)
@@ -138,12 +155,12 @@ const RecipePage = ({ recipe, onEdit, onDelete }) => {
     setCheckedIngredients({});
   }, [recipe?.id]);
 
-  const toggleIngredient = (index) => {
+  const toggleIngredient = React.useCallback((index) => {
     setCheckedIngredients(prev => ({
       ...prev,
       [index]: !prev[index]
     }));
-  };
+  }, []);
 
   if (!recipe) {
     return (
@@ -174,23 +191,15 @@ const RecipePage = ({ recipe, onEdit, onDelete }) => {
         <div>
           <h2 className="text-sm font-bold text-amber-800 uppercase tracking-wider border-b border-amber-200 pb-1 mb-3">Ingredients</h2>
           <ul className="space-y-2">
-            {recipe.ingredients && recipe.ingredients.map((item, index) => {
-              const isChecked = !!checkedIngredients[index];
-              return (
-                <li 
-                  key={index} 
-                  className={`flex items-start group cursor-pointer transition-all duration-200 ${isChecked ? 'opacity-50' : 'opacity-100'}`}
-                  onClick={() => toggleIngredient(index)}
-                >
-                  <div className={`mt-0.5 mr-3 w-5 h-5 flex-shrink-0 border-2 rounded flex items-center justify-center transition-colors ${isChecked ? 'bg-amber-600 border-amber-600' : 'border-amber-300 group-hover:border-amber-500'}`}>
-                    {isChecked && <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
-                  </div>
-                  <span className={`text-base leading-snug font-serif text-gray-800 transition-all ${isChecked ? 'line-through decoration-amber-600/50' : ''}`}>
-                    {item}
-                  </span>
-                </li>
-              );
-            })}
+            {recipe.ingredients && recipe.ingredients.map((item, index) => (
+              <Ingredient
+                key={index}
+                item={item}
+                index={index}
+                isChecked={!!checkedIngredients[index]}
+                onToggle={toggleIngredient}
+              />
+            ))}
           </ul>
         </div>
 
