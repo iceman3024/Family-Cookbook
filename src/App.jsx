@@ -479,14 +479,6 @@ const App = () => {
         Cookbook ID: {userId || '...'}
       </footer>
 
-      {/* CSS Utilities */}
-      <style>{`
-        .rotate-y-90 { transform: rotateY(-90deg); }
-        .shadow-inner-paper { box-shadow: inset 20px 0 50px rgba(0,0,0,0.1), 5px 0 15px rgba(0,0,0,0.1); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(146, 64, 14, 0.2); border-radius: 20px; }
-      `}</style>
     </div>
   );
 };
